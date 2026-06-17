@@ -17,6 +17,9 @@ public class SettlementResponseDTO {
     private Boolean riskCheckPassed;
     private String riskReason;
     private LocalDateTime createdAt;
+    private String selectedBankCode;
+    private String selectedBankName;
+    private String inquiryId;
 
     public String getRequestNo() {
         return requestNo;
@@ -104,5 +107,29 @@ public class SettlementResponseDTO {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getSelectedBankCode() {
+        return selectedBankCode;
+    }
+
+    public void setSelectedBankCode(String selectedBankCode) {
+        this.selectedBankCode = selectedBankCode;
+    }
+
+    public String getSelectedBankName() {
+        return selectedBankName;
+    }
+
+    public void setSelectedBankName(String selectedBankName) {
+        this.selectedBankName = selectedBankName;
+    }
+
+    public String getInquiryId() {
+        return inquiryId;
+    }
+
+    public void setInquiryId(String inquiryId) {
+        this.inquiryId = inquiryId;
     }
 }

@@ -2,7 +2,9 @@ package com.crossborder.fx.risk;
 
 import com.crossborder.fx.common.Currency;
 import com.crossborder.fx.common.SettlementStatus;
+import com.crossborder.fx.dto.BankQuoteDTO;
 import com.crossborder.fx.dto.CurrencyExposureDTO;
+import com.crossborder.fx.dto.MultiBankQuoteResultDTO;
 import com.crossborder.fx.dto.RiskCheckResultDTO;
 import com.crossborder.fx.dto.SettlementRequestDTO;
 import com.crossborder.fx.entity.ExchangeRate;
@@ -36,6 +38,7 @@ public class PositionRiskService {
     private final PositionExposureRepository exposureRepository;
     private final SettlementRequestRepository settlementRepository;
     private final SellerRepository sellerRepository;
+    private final SmartRoutingEngine routingEngine;
 
     @Value("${fx.risk.default-exposure-limit-cny:100000000}")
     private BigDecimal defaultExposureLimitCny;
@@ -46,11 +49,13 @@ public class PositionRiskService {
     public PositionRiskService(ExchangeRateService rateService,
                                PositionExposureRepository exposureRepository,
                                SettlementRequestRepository settlementRepository,
-                               SellerRepository sellerRepository) {
+                               SellerRepository sellerRepository,
+                               SmartRoutingEngine routingEngine) {
         this.rateService = rateService;
         this.exposureRepository = exposureRepository;
         this.settlementRepository = settlementRepository;
         this.sellerRepository = sellerRepository;
+        this.routingEngine = routingEngine;
     }
 
     @Transactional
@@ -70,16 +75,26 @@ public class PositionRiskService {
             return result;
         }
 
-        ExchangeRate latestRate = rateService.getLatestRate(
-                requestDTO.getOriginalCurrency(), requestDTO.getTargetCurrency());
-        result.setExchangeRate(latestRate.getBuyPrice());
-        result.setBuyPrice(latestRate.getBuyPrice());
-        result.setSellPrice(latestRate.getSellPrice());
-        result.setMidPrice(latestRate.getMidPrice());
+        MultiBankQuoteResultDTO routingResult = routingEngine.executeRouting(
+                "RISK_CHECK_" + requestDTO.getSellerId() + "_" + System.currentTimeMillis(),
+                requestDTO.getSellerId(),
+                requestDTO.getOriginalCurrency(),
+                requestDTO.getTargetCurrency(),
+                requestDTO.getOriginalAmount());
 
-        BigDecimal targetAmount = requestDTO.getOriginalAmount()
-                .multiply(latestRate.getBuyPrice())
-                .setScale(2, RoundingMode.HALF_UP);
+        result.setExchangeRate(routingResult.getSelectedBuyPrice());
+        result.setBuyPrice(routingResult.getSelectedBuyPrice());
+        result.setSellPrice(routingResult.getSelectedBuyPrice());
+        result.setMidPrice(routingResult.getSelectedBuyPrice());
+        result.setInquiryId(routingResult.getInquiryId());
+        result.setSelectedBankCode(routingResult.getSelectedBankCode());
+        result.setSelectedBankName(routingResult.getSelectedBankName());
+        result.setBankQuotes(routingResult.getQuotes());
+
+        BigDecimal targetAmount = routingResult.getSelectedTargetAmount() != null
+                ? routingResult.getSelectedTargetAmount()
+                : requestDTO.getOriginalAmount().multiply(routingResult.getSelectedBuyPrice())
+                  .setScale(2, RoundingMode.HALF_UP);
         result.setTargetAmount(targetAmount);
 
         Map<Currency, CurrencyExposureDTO> exposures = calculateProjectedExposures(

@@ -4,6 +4,7 @@ import com.crossborder.fx.common.Currency;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 public class RiskCheckResultDTO {
@@ -25,6 +26,10 @@ public class RiskCheckResultDTO {
     private boolean circuitBreakerTriggered;
     private String riskReason;
     private LocalDateTime checkTime;
+    private String inquiryId;
+    private String selectedBankCode;
+    private String selectedBankName;
+    private List<BankQuoteDTO> bankQuotes;
 
     public String getSellerId() {
         return sellerId;
@@ -160,5 +165,37 @@ public class RiskCheckResultDTO {
 
     public void setCheckTime(LocalDateTime checkTime) {
         this.checkTime = checkTime;
+    }
+
+    public String getInquiryId() {
+        return inquiryId;
+    }
+
+    public void setInquiryId(String inquiryId) {
+        this.inquiryId = inquiryId;
+    }
+
+    public String getSelectedBankCode() {
+        return selectedBankCode;
+    }
+
+    public void setSelectedBankCode(String selectedBankCode) {
+        this.selectedBankCode = selectedBankCode;
+    }
+
+    public String getSelectedBankName() {
+        return selectedBankName;
+    }
+
+    public void setSelectedBankName(String selectedBankName) {
+        this.selectedBankName = selectedBankName;
+    }
+
+    public List<BankQuoteDTO> getBankQuotes() {
+        return bankQuotes;
+    }
+
+    public void setBankQuotes(List<BankQuoteDTO> bankQuotes) {
+        this.bankQuotes = bankQuotes;
     }
 }

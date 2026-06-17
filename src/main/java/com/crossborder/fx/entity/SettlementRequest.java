@@ -48,6 +48,12 @@ public class SettlementRequest {
     @Column(name = "risk_reason", length = 512)
     private String riskReason;
 
+    @Column(name = "selected_bank_code", length = 32)
+    private String selectedBankCode;
+
+    @Column(name = "selected_bank_name", length = 64)
+    private String selectedBankName;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -154,6 +160,22 @@ public class SettlementRequest {
 
     public void setRiskReason(String riskReason) {
         this.riskReason = riskReason;
+    }
+
+    public String getSelectedBankCode() {
+        return selectedBankCode;
+    }
+
+    public void setSelectedBankCode(String selectedBankCode) {
+        this.selectedBankCode = selectedBankCode;
+    }
+
+    public String getSelectedBankName() {
+        return selectedBankName;
+    }
+
+    public void setSelectedBankName(String selectedBankName) {
+        this.selectedBankName = selectedBankName;
     }
 
     public LocalDateTime getCreatedAt() {

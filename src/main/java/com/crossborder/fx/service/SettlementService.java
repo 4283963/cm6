@@ -7,6 +7,7 @@ import com.crossborder.fx.dto.RiskCheckResultDTO;
 import com.crossborder.fx.dto.SettlementRequestDTO;
 import com.crossborder.fx.dto.SettlementResponseDTO;
 import com.crossborder.fx.entity.SettlementRequest;
+import com.crossborder.fx.repository.RoutingDecisionRepository;
 import com.crossborder.fx.repository.SettlementRequestRepository;
 import com.crossborder.fx.risk.PositionRiskService;
 import com.crossborder.fx.service.IdempotentService.IdempotentResult;
@@ -31,16 +32,19 @@ public class SettlementService {
     private final SettlementRequestRepository settlementRepository;
     private final PositionRiskService positionRiskService;
     private final IdempotentService idempotentService;
+    private final RoutingDecisionRepository routingDecisionRepository;
 
     @Value("${fx.settlement.instant-mode:false}")
     private boolean instantMode;
 
     public SettlementService(SettlementRequestRepository settlementRepository,
                              PositionRiskService positionRiskService,
-                             IdempotentService idempotentService) {
+                             IdempotentService idempotentService,
+                             RoutingDecisionRepository routingDecisionRepository) {
         this.settlementRepository = settlementRepository;
         this.positionRiskService = positionRiskService;
         this.idempotentService = idempotentService;
+        this.routingDecisionRepository = routingDecisionRepository;
     }
 
     @Transactional
@@ -219,6 +223,11 @@ public class SettlementService {
         dto.setRiskCheckPassed(request.getRiskCheckPassed());
         dto.setRiskReason(request.getRiskReason());
         dto.setCreatedAt(request.getCreatedAt());
+        routingDecisionRepository.findByRequestNo(request.getRequestNo()).ifPresent(decision -> {
+            dto.setSelectedBankCode(decision.getSelectedBankCode());
+            dto.setSelectedBankName(decision.getSelectedBankName());
+            dto.setInquiryId(decision.getInquiryId());
+        });
         return dto;
     }
 
