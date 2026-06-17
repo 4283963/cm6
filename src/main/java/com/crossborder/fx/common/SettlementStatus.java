@@ -6,5 +6,6 @@ public enum SettlementStatus {
     REJECTED,
     COMPLETED,
     CANCELLED,
-    RISK_REJECTED
+    RISK_REJECTED,
+    LOCK_FAILED
 }
